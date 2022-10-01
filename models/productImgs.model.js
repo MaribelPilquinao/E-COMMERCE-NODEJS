@@ -12,7 +12,7 @@ const ProductImg = db.define('productImg', {
         allowNull: false,
     },
     productId: {
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
         allowNull: false,
     },
     status: {

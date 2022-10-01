@@ -12,11 +12,10 @@ const startServer = async () => {
     try {
         await db.authenticate();
 
+        // Establish the relations between models
         initModels();
         
         await db.sync();
-
-        // Establish the relations between models
 
         // Set server to listen
         const PORT = 2801;
