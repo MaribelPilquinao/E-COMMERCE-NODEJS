@@ -4,6 +4,7 @@ const express = require('express');
 const { usersRouter } = require('./routes/user.routes');
 const { productsRouter } = require('./routes/product.routes');
 const { categoryRouter } = require('./routes/category.routes');
+const { ordersRouter } = require('./routes/order.routes');
 
 // Controllers
 const { globalErrorHandler } = require('./controllers/error.controller');
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/products', productsRouter);
 app.use('/api/v1/categories', categoryRouter);
+app.use('/api/v1/orders', ordersRouter);
 
 // Global error handler
 app.use(globalErrorHandler);

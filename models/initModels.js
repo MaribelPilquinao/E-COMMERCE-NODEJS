@@ -33,7 +33,7 @@ const initModels = () => {
     ProductImg.belongsTo(Product)
 
     // M Product --- Cart
-    Product.belongsTo(Cart, {
+    Product.hasOne(Cart, {
         through: 'productsInCart',
         foreignKey: 'productId'
     });

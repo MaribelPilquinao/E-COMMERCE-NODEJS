@@ -18,6 +18,7 @@ const createCategory = catchAsync(async (req, res, next) => {
     const category = new Category({ name });
 
     await category.save();
+    
     res.status(201).json({
         status: 'success',
     });
