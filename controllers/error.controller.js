@@ -31,9 +31,9 @@ const tokenInvalidSignatureError = () => {
 const dbUniqueConstraintError = () => {
 	return new AppError('The entered email has already been taken', 400);
 };
-// ! AQUÍ VER CUÁNTAS IMAGENES QUIERES DE LIMITES EN E-COMMERCE
+
 const imgLimitError = () => {
-	return new AppError('You can only upload 3 images', 400);
+	return new AppError('You can only upload 5 images', 400);
 };
 
 const globalErrorHandler = (error, req, res, next) => {

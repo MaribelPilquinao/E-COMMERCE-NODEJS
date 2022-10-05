@@ -46,12 +46,9 @@ const protectSession = catchAsync(async (req, res, next) => {
     next();
 });
 
-// Check the sessionUser to compare to the one that wants to be updated/deleted
 const protectUsersAccount = (req, res, next) => {
     const { sessionUser, user } = req;
-    // const { id } = req.params;
 
-    // If the users (ids) don't match, send an error, otherwise continue
     if (sessionUser.id !== user.id) {
         return next(
             new AppError('You are not the owner of this account.', 403)
@@ -60,15 +57,44 @@ const protectUsersAccount = (req, res, next) => {
 
     next();
 };
-
 const protectAdmin = (req, res, next) => {
-	const { sessionUser } = req;
+    const { sessionUser } = req;
 
-	if (sessionUser.role !== 'admin') {
-		return next(new AppError('You do not have the right access level.', 403));
-	}
+    if (sessionUser.role !== 'admin') {
+        return next(
+            new AppError('You do not have the right access level.', 403)
+        );
+    }
 
-	next();
+    next();
 };
 
-module.exports = { protectSession, protectUsersAccount, protectAdmin };
+const protectOrderOwner = (req, res, next) => {
+    const { sessionUser, order } = req;
+
+    if (sessionUser.id !== order.userId) {
+        return next(new AppError('This order does not belong to you.', 403));
+    }
+
+    order.userId = undefined;
+
+    next();
+};
+
+const protectProductOwner = (req, res, next) => {
+    const { sessionUser, product } = req;
+
+    if (sessionUser.id !== product.userId) {
+        return next(new AppError('This product does not belong to you.', 403));
+    }
+
+    next();
+};
+
+module.exports = {
+    protectSession,
+    protectUsersAccount,
+    protectAdmin,
+    protectOrderOwner,
+    protectProductOwner,
+};

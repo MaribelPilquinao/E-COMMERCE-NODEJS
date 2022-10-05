@@ -9,6 +9,8 @@ const {
     getAllProductUser,
 } = require('../controllers/user.controller');
 
+const { ordersRouter } = require('../routes/order.routes')
+
 // Middlewares
 const { userExists } = require('../middlewares/user.middlewares');
 const {
@@ -17,7 +19,6 @@ const {
 } = require('../middlewares/validators.middlewares');
 const {
     protectSession,
-    protectAdmin,
     protectUsersAccount,
 } = require('../middlewares/auth.middlewares');
 
@@ -32,8 +33,10 @@ usersRouter.use(protectSession)
 
 usersRouter.get('/me', getAllProductUser);
 
-usersRouter.patch('/:id', userExists, updateUser);
+usersRouter.patch('/:id', userExists, protectUsersAccount, updateUser);
 
-usersRouter.delete('/:id', userExists, deleteUser);
+usersRouter.delete('/:id', userExists, protectUsersAccount, deleteUser);
+
+usersRouter.use('/orders', ordersRouter)
 
 module.exports = { usersRouter };

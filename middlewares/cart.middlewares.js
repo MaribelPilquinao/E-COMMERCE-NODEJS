@@ -6,62 +6,56 @@ const { Product } = require('../models/product.model');
 const { AppError } = require('../utils/appError.util');
 const { catchAsync } = require('../utils/catchAsync.util');
 
-const verifyProductNotExceedQuantity = (req, res, next) => {};
-
-const productInCartExist = catchAsync(async (req, res, next) => {
-    const { sessionUser } = req;
-
-    const { productId } = req.body;
-    // const { id } = req;
-
-    // verify if the user have an active cart
-    const cart = await Cart.findOne({
-        where: { userId: sessionUser.id, status: 'active' },
-    });
-
-    // Check if the productInCart exist, and product
-
-    const productInCart = await ProductsInCart.findOne({
-        where: { productId, cartId: cart.id, status: 'active' },
-    });
-
-    const product = await Product.findOne({
-        where: { id, status: 'active' },
-    });
-
-    if (!productInCart || !product) {
-        return next(
-            new AppError('The product does not exist in the cart', 400)
-        );
-    }
-
-    req.productInCart = productInCart;
-    req.product = product;
-
-    next();
-});
-
-// !AGREGAR A LA RUTA CUANDO ESTÉ LISTO EL CONTROLLER MIENTRAS ESTOY VALIDANDO QUE EXISTA POR EL ID
-const validExistProductIdByParams = catchAsync(async (req, res, next) => {
-    const { productId } = req.params;
-
-    const product = await Product.findOne({
-        where: {
-            id: productId,
-            status: true,
-        },
-    });
+const verifyProductNotExceedQuantity = (req, res, next) => {
+    const { product } = req;
+    const { quantity } = req.body;
 
     if (!product) {
-        return next(new AppError('there is no id with that product', 404));
+        return next(
+            new AppError('You cannot exceed the available quantity', 404)
+        );
+    } else if (quantity > product.quantity) {
+        return next(new AppError(`This product only has ${product.quantity} items.`, 404));
+    }
+    next();
+};
+
+const productInCartExist = catchAsync(async (req, res, next) => {
+    const { productId, quantity } = req.body
+
+    const { cart } = req
+
+    const productInCart = await ProductsInCart.findOne({
+        where: {
+            cartId: cart.id,
+            productId,
+        },
+    })
+
+    if (!productInCart) {
+        return next()
     }
 
-    next();
+    if (productInCart.status === 'active') {
+        return next(new AppError('This product already in the cart', 400))
+    }
+
+    if (productInCart.status === 'removed') {
+        await productInCart.update({
+            status: 'active',
+            quantity,
+        })
+        res.status(200).json({
+            status: 'success',
+            data: { productInCart },
+        })
+    }
 });
 
-// * VALIDO QUE EXISTA EL PRODUCTO EN EL CARRITO POR EL ID
+
 const validExistProductInCartParams = catchAsync(async (req, res, next) => {
-    const { productId } = req.params;
+    const productId  = req.body.id || req.params
+    const id  = req.params  || req.bod.productId
 
     const productInCart = await ProductsInCart.findOne({
         where: { productId, status: 'active' },
@@ -77,9 +71,33 @@ const validExistProductInCartParams = catchAsync(async (req, res, next) => {
     next();
 });
 
+
+const cartIsActive = catchAsync(async (req, res, next) => {
+    const { sessionUser } = req
+
+    let cart = await Cart.findOne({
+        where: { userId: sessionUser.id, status: 'active' },
+        include: {
+            model: ProductsInCart,
+            required: false,
+            where: { status: 'active' },
+        },
+    })
+
+    if (!cart) {
+        cart = await Cart.create({
+            userId: sessionUser.id,
+        })
+    }
+
+    req.cart = cart
+
+    next()
+})
+
 module.exports = {
     verifyProductNotExceedQuantity,
     productInCartExist,
-    validExistProductIdByParams,
     validExistProductInCartParams,
+    cartIsActive,
 };

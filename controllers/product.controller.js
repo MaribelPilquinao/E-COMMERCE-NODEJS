@@ -1,6 +1,14 @@
 // Models
 const { Product } = require('../models/product.model');
+const { ProductImg } = require('../models/productImgs.model');
+const { Category } = require('../models/category.model');
+
 const { catchAsync } = require('../utils/catchAsync.util');
+const {
+    uploadProductImgs,
+    getProductImgsUrls,
+    getProductsImgsUrls,
+} = require('../utils/firebase.util');
 
 const createProducts = catchAsync(async (req, res, next) => {
     const { title, description, price, categoryId, quantity } = req.body;
@@ -14,6 +22,8 @@ const createProducts = catchAsync(async (req, res, next) => {
         quantity,
         userId: sessionUser.id,
     });
+
+    await uploadProductImgs(req.files, newProduct.id);
 
     res.status(201).json({
         status: 'success',
@@ -29,20 +39,32 @@ const getAllProducts = catchAsync(async (req, res, next) => {
             'description',
             'price',
             'quantity',
-            'categoryId',
             'userId',
             'createdAt',
         ],
+        include: [
+            {
+                model: ProductImg,
+                required: false,
+                where: { status: 'active' },
+                attributes: ['id', 'imgUrl'],
+            },
+            {
+                model: Category,
+                attributes: ['id', 'name'],
+            },
+        ],
     });
+    const productsWithImgs = await getProductsImgsUrls(products);
 
     res.status(200).json({
         status: 'success',
-        data: { products },
+        data: { products: productsWithImgs },
     });
 });
 
 const getProductById = catchAsync(async (req, res, next) => {
-    const { id } = req.params;
+    const { id } = req.product;
 
     const product = await Product.findOne({
         where: { id, status: 'active' },
@@ -55,11 +77,25 @@ const getProductById = catchAsync(async (req, res, next) => {
             'userId',
             'createdAt',
         ],
+        include: [
+            {
+                model: ProductImg,
+                required: false,
+                where: { status: 'active' },
+                attributes: ['id', 'imgUrl'],
+            },
+            {
+                model: Category,
+                attributes: ['id', 'name'],
+            },
+        ],
     });
+
+    const productWithImgs = await getProductImgsUrls(product);
 
     res.status(200).json({
         status: 'success',
-        data: { product },
+        data: { product: productWithImgs },
     });
 });
 

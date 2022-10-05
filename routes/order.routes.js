@@ -7,14 +7,13 @@ const {
 } = require('../controllers/order.controller');
 
 // middlewares
-const { protectSession } = require('../middlewares/auth.middlewares');
+const { protectOrderOwner } = require('../middlewares/auth.middlewares');
+const { orderExists } = require('../middlewares/order.middlewares');
 
 const ordersRouter = express.Router();
 
-ordersRouter.use(protectSession);
-
 ordersRouter.get('/', getAllOrders);
 
-ordersRouter.get('/:id', getOrderById);
+ordersRouter.get('/:id', orderExists, protectOrderOwner, getOrderById);
 
 module.exports = { ordersRouter };

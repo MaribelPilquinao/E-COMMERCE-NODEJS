@@ -59,37 +59,57 @@ const createProductsValidations = [
     body('title')
         .isString()
         .withMessage('Title must be a string')
-        .isEmpty()
-        .withMessage('Title cannot be empty')
         .isLength({ min: 3 })
         .withMessage('Title must be at least 3 characters'),
     body('description')
         .isString()
         .withMessage('Description must be a string')
-        .isEmpty()
-        .withMessage('Description cannot be empty')
         .isLength({ min: 3 })
         .withMessage('Description must be at least 3 characters'),
     body('price')
-        .isInt()
-        .withMessage('Price must be a integer')
-        .isEmpty()
-        .withMessage('Price cannot be empty'),
-    body('categoyId')
-        .isInt()
-        .withMessage('CategoryId must be a integer')
-        .isEmpty()
-        .withMessage('CategoryId cannot be empty'),
+        .isInt({min: 1})
+        .withMessage('Price must be a integer'),
+    body('categoryId')
+        .isInt({min: 1})
+        .withMessage('CategoryId must be a integer'),
     body('quantity')
-        .isInt()
-        .withMessage('Quantity must be a integer')
-        .isEmpty()
-        .withMessage('Quantity cannot be empty'),
+        .isInt({min: 0})
+        .withMessage('Quantity must be a integer'),
     checkValidations,
 ];
+
+const addProductValidators = [
+    body('productId')
+        .isInt({ min: 1 })
+        .withMessage('productId must be a integer.'),
+    body('quantity')
+        .isInt({ min: 1 })
+        .withMessage('quantity must be a integer.'),
+    checkValidations,
+]
+
+const updateProductValidators = [
+    body('productId')
+        .isInt({ min: 1 })
+        .withMessage('productId must be a integer.'),
+    body('newQty').isInt().withMessage('quantity must be a integer.'),
+    checkValidations,
+]
+
+const categoryValidators = [
+    body('name')
+        .isString()
+        .withMessage('Name must be a string')
+        .isLength({ min: 3 })
+        .withMessage('Name must be at least 3 characters'),
+    checkValidations,
+]
 
 module.exports = {
     createUserValidators,
     loginValidations,
     createProductsValidations,
+    addProductValidators,
+    updateProductValidators,
+    categoryValidators,
 };
