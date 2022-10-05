@@ -31,7 +31,7 @@ const uploadProductImgs = async (imgs, productId) => {
         // Create firebase reference
         const [originalName, ext] = img.originalname.split('.'); // -> [pug, jpg]
 
-        const filename = `products/${productId}/${originalName}-${Date.now()}.${ext}`;
+        const filename = `${process.env.NODE_ENV}/products/${productId}/${originalName}-${Date.now()}.${ext}`;
         const imgRef = ref(storage, filename);
 
         // Upload image to Firebase
